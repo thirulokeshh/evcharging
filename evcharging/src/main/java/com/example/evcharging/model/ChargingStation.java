@@ -14,6 +14,19 @@ public class ChargingStation {
     private double latitude;
     private double longitude;
 
+    // how this enums works internally//
+
+    @Enumerated(EnumType.STRING)
+    private StationStatus status =StationStatus.AVAILABLE;
+
+    public StationStatus getStatus() {
+        return status;
+    }
+
+    public void setStatus(StationStatus status) {
+        this.status = status;
+    }
+
     public ChargingStation() {
     }
 

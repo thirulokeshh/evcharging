@@ -1,16 +1,18 @@
 package com.example.evcharging.dto;
 
+import com.example.evcharging.model.StationStatus;
+
 public class ChargingStationDTO {
 
     private Long id;
     private String area;
     private double latitude;
     private double longitude;
-
+    private StationStatus status;
     public ChargingStationDTO() {
     }
 
-    public ChargingStationDTO(Long id, String area, double latitude, double longitude) {
+    public ChargingStationDTO(Long id, String area, double latitude, double longitude,StationStatus status) {
         this.id = id;
         this.area = area;
         this.latitude = latitude;
@@ -47,5 +49,11 @@ public class ChargingStationDTO {
 
     public void setLongitude(double longitude) {
         this.longitude = longitude;
+    }
+    public void setStatus(StationStatus status){
+        this.status=status;
+    }
+    public StationStatus getStatus(){
+        return status;
     }
 }

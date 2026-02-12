@@ -2,7 +2,9 @@ package com.example.evcharging.service;
 
 import com.example.evcharging.dto.ChargingStationDTO;
 import com.example.evcharging.model.ChargingStation;
+import com.example.evcharging.model.StationStatus;
 import com.example.evcharging.repository.ChargingStationRepository;
+import org.springframework.messaging.simp.SimpMessagingTemplate;
 import org.springframework.stereotype.Service;
 
 import java.util.List;
@@ -11,9 +13,14 @@ import java.util.List;
 public class ChargingStationService {
 
     private final ChargingStationRepository repository;
+    private final SimpMessagingTemplate messagingTemplate;
 
-    public ChargingStationService(ChargingStationRepository repository) {
+    public ChargingStationService(
+            ChargingStationRepository repository,
+            SimpMessagingTemplate messagingTemplate
+    ) {
         this.repository = repository;
+        this.messagingTemplate = messagingTemplate;
     }
 
     public ChargingStationDTO createStation(ChargingStationDTO dto) {
@@ -35,11 +42,33 @@ public class ChargingStationService {
                 .orElse(null);
     }
 
+    public ChargingStationDTO updateStatus(Long id, StationStatus status) {
+
+        ChargingStation station = repository.findById(id)
+                .orElseThrow(() -> new RuntimeException("Station not found"));
+
+        station.setStatus(status);
+        ChargingStation saved = repository.save(station);
+
+        ChargingStationDTO dto = toDTO(saved);
+
+        // 🔥 WebSocket event broadcast
+        messagingTemplate.convertAndSend(
+                "/topic/station-status",
+                dto
+        );
+
+        return dto;
+    }
+
     private ChargingStation toEntity(ChargingStationDTO dto) {
         ChargingStation station = new ChargingStation();
         station.setArea(dto.getArea());
         station.setLatitude(dto.getLatitude());
         station.setLongitude(dto.getLongitude());
+        station.setStatus(
+                dto.getStatus() != null ? dto.getStatus() : StationStatus.AVAILABLE
+        );
         return station;
     }
 
@@ -48,7 +77,8 @@ public class ChargingStationService {
                 station.getId(),
                 station.getArea(),
                 station.getLatitude(),
-                station.getLongitude()
+                station.getLongitude(),
+                station.getStatus()
         );
     }
 }

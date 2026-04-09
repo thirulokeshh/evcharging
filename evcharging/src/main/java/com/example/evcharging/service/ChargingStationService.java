@@ -52,7 +52,7 @@ public class ChargingStationService {
 
         ChargingStationDTO dto = toDTO(saved);
 
-        // 🔥 WebSocket event broadcast
+        // WebSocket event broadcast
         messagingTemplate.convertAndSend(
                 "/topic/station-status",
                 dto
